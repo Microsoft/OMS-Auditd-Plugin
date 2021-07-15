@@ -112,12 +112,12 @@ bool CmdlineRedactor::LoadFromDir(const std::string& dir, bool require_only_root
     std::vector<std::shared_ptr<const CmdlineRedactionRule>> new_rules;
 
     if (!PathExists(dir)) {
-        return false;
+        return true;
     }
 
     if (require_only_root && !IsOnlyRootWritable(dir)) {
         Logger::Error("CmdlineRedactor::LoadFromDir(%s): Dir is not secure, it is writable by non-root users. Redaction rules will not be loaded.", dir.c_str());
-        return false;
+        return true;
     }
 
     std::vector<std::string> files;
@@ -125,7 +125,7 @@ bool CmdlineRedactor::LoadFromDir(const std::string& dir, bool require_only_root
         files = GetDirList(dir);
     } catch (std::exception& ex) {
         Logger::Error("CmdlineRedactor::LoadFromDir(%s): Failed to read dir: %s", dir.c_str(), ex.what());
-        return false;
+        return true;
     }
 
     std::unordered_set<std::string> loaded_rule_files;

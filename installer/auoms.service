@@ -3,15 +3,16 @@ Description=OMS Audit data collection daemon
 Documentation=man:auoms(8)
 
 [Service]
-Type=forking
+Type=simple
 Restart=on-failure
 RestartSec=3
 TimeoutSec=30
-KillMode=process
-ExecStart=/etc/init.d/auoms start
-ExecStop=/etc/init.d/auoms stop
-ExecReload=/etc/init.d/auoms reload
+KillMode=mixed
+ExecStartPre=/bin/mkdir -m 0750 -p /var/run/auoms
+ExecStart=/opt/microsoft/auoms/bin/auoms
+ExecReload=/bin/kill -HUP $MAINPID
 CPUWeight=5
+CPUShares=5
 CPUQuota=25%
 
 [Install]

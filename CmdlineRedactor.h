@@ -62,7 +62,8 @@ public:
     // Used only for tests
     void AddRule(std::shared_ptr<const CmdlineRedactionRule>& rule);
 
-    // Return true only if no errors where encountered and all required rules are loaded
+    // Return true if no furthor action is needed (or possible)
+    // Return false, if required rules are missing and another load attempt should be made
     bool LoadFromDir(const std::string& dir, bool require_only_root);
 
     std::vector<std::string> GetMissingRules();

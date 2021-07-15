@@ -34,6 +34,7 @@ ${{AUOMS_BIN}};                               ${{TARGET_DIR}}/builddir/release/b
 ${{AUOMSCTL_BIN}};                            ${{TARGET_DIR}}/builddir/release/bin/auomsctl;      755; root; root
 /etc/init.d/auoms;                            installer/auoms.init;                               555; root; root
 /opt/microsoft/auoms/auoms.service;           installer/auoms.service;                            444; root; root
+/opt/microsoft/auoms/auoms.init;              installer/auoms.init;                               555; root; root
 
 /etc/opt/microsoft/auoms/auoms.conf;          installer/conf/auoms.conf;                          644; root; root; conffile
 /etc/opt/microsoft/auoms/auomscollect.conf;   installer/conf/auomscollect.conf;                   644; root; root; conffile
@@ -54,7 +55,6 @@ ${{AUOMSCTL_BIN}};                            ${{TARGET_DIR}}/builddir/release/b
 /etc/opt/microsoft/auoms;                     755; root; root
 /etc/opt/microsoft/auoms/outconf.d;           755; root; root
 /etc/opt/microsoft/auoms/rules.d;             755; root; root
-/etc/opt/microsoft/auoms/redact.d;            755; root; root
 
 /etc/audisp;                                  750; root; root; sysdir
 /etc/audisp/plugins.d;                        750; root; root; sysdir
@@ -91,3 +91,6 @@ fi
 
 %Postinstall_10
 rm -rf /var/opt/microsoft/auoms/data
+if [ -e /bin/systemctl ]; then
+    rm /etc/init.d/auoms
+fi

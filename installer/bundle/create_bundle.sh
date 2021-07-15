@@ -102,7 +102,7 @@ INTERMEDIATE_DIR=`(cd $INTERMEDIATE; pwd -P)`
 
 cd $INTERMEDIATE
 
-AUOMS_PACKAGE=`ls auoms-*.rpm | sed 's/.rpm$//' | tail -1`
+AUOMS_PACKAGE=`ls auoms-[0-9]*.rpm | sed 's/.rpm$//' | tail -1`
 
 # TODO : Add verification to insure all flavors exist
 

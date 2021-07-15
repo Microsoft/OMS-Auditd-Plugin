@@ -463,20 +463,6 @@ int show_auoms_status() {
 /**********************************************************************************************************************
  **
  *********************************************************************************************************************/
-std::string get_service_util_path() {
-    std::string path = "/sbin/service";
-    if (!PathExists(path)) {
-        path = "/usr/sbin/service";
-        if (!PathExists(path)) {
-            throw std::runtime_error("Could not find path to 'service' utility");
-        }
-    }
-    return path;
-}
-
-/**********************************************************************************************************************
- **
- *********************************************************************************************************************/
 
 enum AuditdPluginConfigState:int {
     AUDITD_PLUGIN_ENABLED=1,
@@ -572,6 +558,14 @@ bool is_service_enabled() {
     std::string path = SYSTEMCTL_PATH;
     if (!PathExists(path)) {
         return is_service_sysv_enabled();
+    } else {
+        // On some systemd systems the presence of /etc/init.d/auoms will cause "systemctl is-enabled" to return invalid service status
+        // We attempt to remove the file before checking service status
+        if (unlink("/etc/init.d/auoms") != 0) {
+            if (errno != ENOENT) {
+                throw std::system_error(errno, std::system_category(), "Failed to remove /etc/init.d/auoms: ");
+            }
+        }
     }
 
     std::vector<std::string> args;
@@ -725,11 +719,33 @@ void kill_service_proc(const std::string& comm) {
 /**********************************************************************************************************************
  **
  *********************************************************************************************************************/
+
+std::string get_service_util_path() {
+    std::string path = "/sbin/service";
+    if (!PathExists(path)) {
+        path = "/usr/sbin/service";
+        if (!PathExists(path)) {
+            return "";
+        }
+    }
+    return path;
+}
+
 void service_cmd(const std::string& svc_cmd, const std::string& name) {
-    std::string path = get_service_util_path();
     std::vector<std::string> args;
-    args.emplace_back(name);
-    args.emplace_back(svc_cmd);
+    std::string path = get_service_util_path();
+
+    if (!path.empty()) {
+        args.emplace_back(name);
+        args.emplace_back(svc_cmd);
+    } else if (PathExists(SYSTEMCTL_PATH)) {
+        // On some system the 'service' utility is not present, so use systemctl directly.
+        path = SYSTEMCTL_PATH;
+        args.emplace_back(svc_cmd);
+        args.emplace_back(name);
+    } else {
+        throw std::runtime_error("Failed locate service utility");
+    }
 
     std::string cmd_str = path;
     for (auto& arg: args) {
